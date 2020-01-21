@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from models import Actors, Movies, db, db_drop_and_create_all, setup_db
+from models import Actors, Movies, db, db_drop_and_create_all, setup_db, database_path
 
 
 # def create_app(test_config=None):
@@ -157,7 +157,10 @@ def add_actors():
 def edit_movie_details(id):
     movie = Movies.query.filter(Movies.id == id).one_or_none()
     if not movie:
-        abort(404)
+        return jsonify({
+            'success': 'false',
+            'message': 'movie not found'
+        }), 404
     for item in json.loads(request.data).keys():
         if item == 'title':
             title = json.loads(request.data)['title']
@@ -176,7 +179,10 @@ def edit_movie_details(id):
 def edit_actors_details(id):
     actor = Actors.query.filter(Actors.id == id).one_or_none()
     if not actor:
-        abort(404)
+        return jsonify({
+            'success': 'false',
+            'message': 'actor not found'
+        }), 404
     for item in json.loads(request.data).keys():
         if item == 'name':
             name = json.loads(request.data)['name']
@@ -211,7 +217,7 @@ def delete_a_single_movie(id):
         return jsonify(
             {
                 'success': True,
-                'mesage': '{} deleted'.format(id),
+                'message': '{} deleted'.format(id),
             }
         ), 200
     except Exception as error:
@@ -233,7 +239,7 @@ def delete_a_single_actor(id):
         return jsonify(
             {
                 'success': True,
-                'mesage': '{} deleted'.format(id),
+                'message': '{} deleted'.format(id),
             }
         ), 200
     except Exception as error:
