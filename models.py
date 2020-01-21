@@ -1,14 +1,17 @@
 import os
 import json
-import datetime
+from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime
 from flask_sqlalchemy import SQLAlchemy
 
 
-database_filename = "database.db"
-project_dir = os.path.dirname(os.path.abspath(__file__))
-database_path = "sqlite:///{}".format(
-    os.path.join(project_dir, database_filename))
+# database_filename = "database.db"
+# project_dir = os.path.dirname(os.path.abspath(__file__))
+# database_path = "sqlite:///{}".format(
+#     os.path.join(project_dir, database_filename))
+database_path = "postgres://{}@{}/{}".format(
+  'postgres', 'localhost:5432', "Udacity"
+  )
 
 db = SQLAlchemy()
 
@@ -40,7 +43,7 @@ class Movies(db.Model):
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
 
-    def __init__():
+    def __init__(self, title, release_date):
         self.title = title
         self.release_date = release_date
         self.created_at = datetime.now()
@@ -58,7 +61,7 @@ class Movies(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def format(self, title, release_date, created_at, updated_at):
+    def format(self):
         return {
             "title": self.title,
             "release_date": self.release_date,
@@ -80,7 +83,7 @@ class Actors(db.Model):
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
 
-    def __init__():
+    def __init__(self, name, age, gender):
         self.name = name
         self.age = age
         self.gender = gender
@@ -99,7 +102,7 @@ class Actors(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def format(self, name, age, gender, created_at, updated_at):
+    def format(self):
         return {
             "name": self.name,
             "age": self.age,
