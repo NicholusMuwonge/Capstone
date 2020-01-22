@@ -20,11 +20,9 @@ class MoviesTest(unittest.TestCase):
         self.app = app
         self.client = app.test_client
         database_path = "postgres://{}@{}/{}".format(
-            # os.getenv('DATABASE_USER'),
-            # os.getenv('DATABASE_PORT'),
-            # os.getenv('DATABASE_HOST'),
-            # os.getenv("DATABASE_NAME")
-            'postgresql', 'localhost:5432', "Udacity"
+            os.getenv('DATABASE_USER'),
+            os.getenv('DATABASE_HOST'),
+            os.getenv("DATABASE_NAME")
         )
         setup_db(app)
 

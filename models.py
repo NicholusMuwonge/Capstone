@@ -5,13 +5,11 @@ from sqlalchemy import Column, String, Integer, DateTime
 from flask_sqlalchemy import SQLAlchemy
 
 
-# database_filename = "database.db"
-# project_dir = os.path.dirname(os.path.abspath(__file__))
-# database_path = "sqlite:///{}".format(
-#     os.path.join(project_dir, database_filename))
+
 database_path = "postgres://{}@{}/{}".format(
-  'postgres', 'localhost:5432', "Udacity"
-  )
+    os.getenv('DATABASE_USER'), os.getenv(
+        'DATABASE_HOST'), os.getenv("DATABASE_NAME")
+)
 
 db = SQLAlchemy()
 
@@ -25,6 +23,8 @@ def setup_db(app):
     db.init_app(app)
 
 # refresh database
+
+
 def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
