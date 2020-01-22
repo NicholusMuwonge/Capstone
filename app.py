@@ -5,16 +5,13 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import Actors, Movies, db, db_drop_and_create_all, setup_db, database_path
+from auth import AuthError, requires_auth
 
 
-# def create_app(test_config=None):
 # create and configure the app
 app = Flask(__name__)
 CORS(app)
 setup_db(app)
-
-# return app
-# db_drop_and_create_all()
 
 
 @app.route('/')
@@ -23,6 +20,7 @@ def home():
 
 
 @app.route('/movies', methods=['POST'])
+@requires_auth(permission='post:movies')
 def add_movie():
     movie = Movies.query.all()
     keys = ("release_date", "title")
@@ -56,6 +54,7 @@ def add_movie():
 
 
 @app.route('/movies')
+@requires_auth(permission='get:movies')
 def retrieve_movies():
     data = Movies.query.all()
     return jsonify({
@@ -64,7 +63,7 @@ def retrieve_movies():
     }), 200
 
 @app.route('/movies/<int:id>')
-# @jwt_required
+@requires_auth(permission='get:movie')
 def get_a_single_movie(id):
     try:
         data=Movies.query.filter_by(id=id)
@@ -84,7 +83,7 @@ def get_a_single_movie(id):
         return error
 
 @app.route('/actors/<int:id>')
-# @jwt_required
+@requires_auth(permission='get:actor')
 def get_a_single_actor(id):
     try:
         data=Actors.query.filter_by(id=id)
@@ -104,6 +103,7 @@ def get_a_single_actor(id):
         return error
 
 @app.route('/actors')
+@requires_auth(permission='get:actors')
 def retrieve_actors():
     data = Actors.query.all()
     return jsonify({
@@ -113,6 +113,7 @@ def retrieve_actors():
 
 
 @app.route('/actors', methods=['POST'])
+@requires_auth(permission='post:actors')
 def add_actors():
     movie = Actors.query.all()
     keys = ["name", "age", "gender"]
@@ -153,7 +154,7 @@ def add_actors():
 
 
 @app.route('/movies/<id>/edit', methods=['PATCH'])
-# @requires_auth('patch:drinks')
+@requires_auth(permission='patch:movie')
 def edit_movie_details(id):
     movie = Movies.query.filter(Movies.id == id).one_or_none()
     if not movie:
@@ -175,7 +176,7 @@ def edit_movie_details(id):
 
 
 @app.route('/actors/<id>/edit', methods=['PATCH'])
-# @requires_auth('patch:drinks')
+@requires_auth(permission='patch:actors')
 def edit_actors_details(id):
     actor = Actors.query.filter(Actors.id == id).one_or_none()
     if not actor:
@@ -203,7 +204,7 @@ def edit_actors_details(id):
         }), 200
 
 @app.route('/movie/<int:id>/delete', methods=['DELETE'])
-# @jwt_required
+@requires_auth(permission='delete:movie')
 def delete_a_single_movie(id):
     try:
         data=Movies.query.filter_by(id=id).one_or_none()
@@ -225,7 +226,7 @@ def delete_a_single_movie(id):
 
 
 @app.route('/actor/<int:id>/delete', methods=['DELETE'])
-# @jwt_required
+@requires_auth(permission='delete:actor')
 def delete_a_single_actor(id):
     try:
         data=Actors.query.filter_by(id=id).one_or_none()
@@ -244,6 +245,44 @@ def delete_a_single_actor(id):
         ), 200
     except Exception as error:
         return error
+
+
+
+    '''
+Error handling for Authentication errors.
+Returns 401, 403 error codes.
+'''
+@app.errorhandler(AuthError)
+def auth_error(error):
+    return jsonify({
+        'success': False,
+        'error': error.status_code,
+        'message': f"{error.error['code']}: {error.error['description']}"
+    }), error.status_code
+
+
+'''
+Error handling for unprocessable entity.
+'''
+@app.errorhandler(422)
+def unprocessable(error):
+    return jsonify({
+        'success': False,
+        'error': 422,
+        'message': 'unable to process request'
+    }), 422
+
+
+'''
+Error handling for method not allowed.
+'''
+@app.errorhandler(405)
+def not_allowed(error):
+    return jsonify({
+        'success': False,
+        'error': 405,
+        'message': 'method not allowed'
+    }), 405
 
 if __name__ == '__main__':
     app.run(debug=True)
