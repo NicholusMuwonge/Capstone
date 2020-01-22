@@ -1,10 +1,12 @@
 import os
 import json
 from datetime import datetime
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request, abort, jsonify, request
+from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from models import Actors, Movies, db, db_drop_and_create_all, setup_db, database_path
+from models import Actors, Movies, db, db_drop_and_create_all, setup_db
 from auth import AuthError, requires_auth
 
 
@@ -12,7 +14,9 @@ from auth import AuthError, requires_auth
 app = Flask(__name__)
 CORS(app)
 setup_db(app)
-
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 @app.route('/')
 def home():
@@ -25,16 +29,11 @@ def add_movie():
     movie = Movies.query.all()
     keys = ("release_date", "title")
     data = request.get_json()
-    # if data not in keys:
-    #     return jsonify({
-    #         'success': 'false',
-    #         'message': 'fill in the missing fields'
-    #     }), 400
-    # if not data['release_date'] == '' or not data['release_date']:
-    #     return jsonify({
-    #         'success': 'false',
-    #         'message': 'please add the release_date'
-    #     }), 400
+    if not set(keys).issubset(set(data)):
+        return jsonify({
+            'success': 'false',
+            'message': 'fill in the missing fields'
+        }), 400
 
     if 15 < len(data['title']) < 3 or not data['title'].isalnum() or \
             bool(Movies.query.filter_by(title=data['title']).first()):
@@ -119,11 +118,12 @@ def add_actors():
     keys = ["name", "age", "gender"]
     gender_list = ["male", "female"]
     data = request.get_json()
-    # if data not in keys:
-    #     return jsonify({
-    #         'success': 'false',
-    #         'message': 'fill in the missing fields'
-    #     }), 400
+    age= request.form.get('age', None)
+    if not set(keys).issubset(set(data)):
+        return jsonify({
+            'success': 'false',
+            'message': 'fill in the missing fields'
+        }), 400
 
     if 15 < len(data['name']) < 3 or not data['name'].isalnum() or \
             bool(Actors.query.filter_by(name=data['name']).first()):
@@ -132,11 +132,11 @@ def add_actors():
             'message': 'incorrect name or name exists'
         }), 400
 
-    elif len(data['age']) > 2 and not isinstance((data['age']), int):
-        return jsonify({
-            'success': 'false',
-            'message': 'invalid age'
-        }), 400
+    # elif len(data['age']) > 2 and not isinstance((data['age']), int):
+    #     return jsonify({
+    #         'success': 'false',
+    #         'message': 'invalid age'
+    #     }), 400
     elif (data['gender']) not in gender_list and not isinstance((data['gender']), str):
         return jsonify({
             'success': 'false',
@@ -285,4 +285,4 @@ def not_allowed(error):
     }), 405
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    manager.run()

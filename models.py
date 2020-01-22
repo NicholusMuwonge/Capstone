@@ -1,15 +1,10 @@
-import os
-import json
+import os, json
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime
 from flask_sqlalchemy import SQLAlchemy
 
 
-
-database_path = "postgres://{}@{}/{}".format(
-    os.getenv('DATABASE_USER'), os.getenv(
-        'DATABASE_HOST'), os.getenv("DATABASE_NAME")
-)
+database_path = os.getenv('DATABASE_URL')
 
 db = SQLAlchemy()
 
@@ -23,8 +18,6 @@ def setup_db(app):
     db.init_app(app)
 
 # refresh database
-
-
 def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
