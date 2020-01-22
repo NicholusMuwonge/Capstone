@@ -92,7 +92,7 @@ python-editor==1.0.4
 python-jose==3.0.1
 python-twitter==3.5
 pytz==2018.9
-PyYAML==3.13
+PyYAML==5.1
 readtime==1.1.1
 requests==2.21.0
 requests-oauthlib==1.2.0
