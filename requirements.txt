@@ -38,7 +38,7 @@ idna==2.8
 isort==4.3.4
 itsdangerous==1.1.0
 javascript==2015.32.59
-Jinja2==2.10
+Jinja2==2.11.3
 jmespath==0.9.4
 jose==1.0.0
 jsonschema==2.6.0
