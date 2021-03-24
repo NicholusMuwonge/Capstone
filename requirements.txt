@@ -85,7 +85,7 @@ PyYAML==3.13
 readtime==1.1.1
 requests==2.21.0
 requests-oauthlib==1.2.0
-rsa==3.4.2
+rsa==4.1
 s3transfer==0.3.0
 six==1.12.0
 soupsieve==1.9.1
